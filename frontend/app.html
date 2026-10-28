@@ -2,301 +2,576 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#050816">
-<title>BhashaMitra AI — Assistant</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#050816;color:#f4f7ff;font-family:Arial,Helvetica,sans-serif;min-height:100vh}
-a{color:inherit;text-decoration:none}
-.topbar{height:70px;padding:0 max(5%,calc((100% - 1050px)/2));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1d2b47;background:#080d19}
-.brand{font-weight:800;font-size:18px;color:#21d6ff}
-.back{color:#a8b8d2;font-size:14px}
-.layout{width:min(1050px,92%);margin:38px auto;display:grid;grid-template-columns:230px 1fr;gap:22px}
-.sidebar,.chat-panel{background:#0a1120;border:1px solid #1d2b47;border-radius:18px}
-.sidebar{padding:20px;height:max-content}
-.label{color:#8497b8;font-size:11px;letter-spacing:1.5px;font-weight:bold;margin:12px 0}
-.mode{display:block;width:100%;padding:12px;margin:5px 0;text-align:left;background:transparent;color:#cbd7eb;border:1px solid transparent;border-radius:9px;cursor:pointer;font-size:13px}
-.mode:hover,.mode.active{background:#122446;border-color:#244b82;color:#36dfff}
-.sidebar p{color:#91a4c4;font-size:12px;line-height:1.6}
-.chat-panel{overflow:hidden;min-width:0}
-.chat-head{padding:23px 25px;border-bottom:1px solid #1d2b47;display:flex;align-items:center;gap:14px}
-.logo{width:47px;height:47px;border-radius:14px;background:linear-gradient(135deg,#00d4ff,#435cff);display:grid;place-items:center;font-size:25px;font-weight:bold}
-.chat-head h1{font-size:19px;margin:0 0 4px}
-.chat-head p{margin:0;color:#92a6c7;font-size:12px}
-.online{margin-left:auto;color:#67e8a5;font-size:11px;white-space:nowrap}
-.controls{padding:18px 24px;display:flex;gap:12px;flex-wrap:wrap;border-bottom:1px solid #1d2b47}
-select{background:#0b1426;color:#f4f7ff;border:1px solid #2b3b5a;border-radius:9px;padding:11px;flex:1;min-width:125px}
-.messages{padding:24px;min-height:300px;max-height:48vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
-.welcome{text-align:center;margin:auto;padding:25px 10px}
-.welcome-icon{font-size:38px}
-.welcome h2{font-size:24px;margin:10px 0}
-.welcome p{font-size:13px;color:#91a4c4;line-height:1.7}
-.bubble{max-width:88%;padding:13px 15px;border-radius:13px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.7}
-.user{align-self:flex-end;background:linear-gradient(130deg,#164c98,#294bba);border-bottom-right-radius:3px}
-.assistant{align-self:flex-start;background:#111d32;border:1px solid #243655;border-bottom-left-radius:3px}
-.bubble-label{display:block;font-size:10px;color:#83dfff;margin-bottom:5px;font-weight:bold}
-.composer{border-top:1px solid #1d2b47;padding:18px 22px 22px}
-textarea{width:100%;resize:vertical;min-height:90px;max-height:200px;background:#080e1a;color:#f4f7ff;border:1px solid #2b3b5a;border-radius:12px;padding:14px;font:inherit;font-size:14px;outline:none}
-textarea:focus,select:focus{border-color:#00cfff}
-.composer-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
-.left-actions{display:flex;gap:8px;flex-wrap:wrap}
-button{border:0;cursor:pointer;font-weight:bold;border-radius:9px;padding:12px 16px;font-size:13px}
-.send{color:white;background:linear-gradient(110deg,#00c9ed,#3d5eff)}
-.tool{color:#c4d4ef;background:#111d32;border:1px solid #2b3b5a}
-button:disabled{opacity:.55;cursor:not-allowed}
-.hint{font-size:11px;color:#8396b6;margin-top:12px;line-height:1.6}
-.status{font-size:12px;color:#8fa4c7;margin-top:10px;min-height:18px}
-@media(max-width:700px){.layout{grid-template-columns:1fr;margin:20px auto}.sidebar{padding:12px}.mode-list{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.sidebar .label{margin:5px 0}.sidebar p{display:none}.messages{min-height:250px;max-height:50vh}.chat-head{padding:17px}.online{display:none}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050816">
+  <title>BhashaMitra AI — Assistant</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #050816;
+      color: #f4f7ff;
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .topbar {
+      min-height: 70px;
+      padding: 15px 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      border-bottom: 1px solid #1d2b47;
+      background: #080d19;
+    }
+
+    .brand { font-weight: 800; font-size: 18px; color: #21d6ff; }
+    .back { color: #a8b8d2; font-size: 14px; }
+
+    .layout {
+      width: min(1050px, 92%);
+      margin: 38px auto;
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 22px;
+    }
+
+    .sidebar, .chat-panel {
+      background: #0a1120;
+      border: 1px solid #1d2b47;
+      border-radius: 18px;
+    }
+
+    .sidebar { padding: 20px; height: max-content; }
+    .label {
+      color: #8497b8;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    .mode {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 5px 0;
+      text-align: left;
+      background: transparent;
+      color: #cbd7eb;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .mode:hover, .mode.active {
+      background: #122446;
+      border-color: #244b82;
+      color: #36dfff;
+    }
+
+    .sidebar p { color: #91a4c4; font-size: 12px; line-height: 1.6; }
+    .chat-panel { overflow: hidden; min-width: 0; }
+
+    .chat-head {
+      padding: 23px 25px;
+      border-bottom: 1px solid #1d2b47;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 47px;
+      height: 47px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg,#00d4ff,#435cff);
+      display: grid;
+      place-items: center;
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .chat-head h1 { font-size: 19px; margin: 0 0 4px; }
+    .chat-head p { margin: 0; color: #92a6c7; font-size: 12px; }
+    .online { margin-left: auto; color: #67e8a5; font-size: 11px; }
+
+    .controls {
+      padding: 18px 24px;
+      border-bottom: 1px solid #1d2b47;
+    }
+
+    select {
+      width: 100%;
+      background: #0b1426;
+      color: #f4f7ff;
+      border: 1px solid #2b3b5a;
+      border-radius: 9px;
+      padding: 11px;
+    }
+
+    .messages {
+      padding: 24px;
+      min-height: 300px;
+      max-height: 48vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .welcome { text-align: center; margin: auto; padding: 25px 10px; }
+    .welcome-icon { font-size: 38px; }
+    .welcome h2 { font-size: 24px; margin: 10px 0; }
+    .welcome p { font-size: 13px; color: #91a4c4; line-height: 1.7; }
+
+    .bubble {
+      max-width: 90%;
+      padding: 13px 15px;
+      border-radius: 13px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: linear-gradient(130deg,#164c98,#294bba);
+      border-bottom-right-radius: 3px;
+    }
+
+    .assistant {
+      align-self: flex-start;
+      background: #111d32;
+      border: 1px solid #243655;
+      border-bottom-left-radius: 3px;
+    }
+
+    .bubble-label {
+      display: block;
+      font-size: 10px;
+      color: #83dfff;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .bubble-text { white-space: pre-wrap; }
+
+    .listen-btn {
+      display: inline-block;
+      margin-top: 12px;
+      margin-right: 8px;
+      padding: 9px 12px;
+      color: #c4d4ef;
+      background: #0b1426;
+      border: 1px solid #2b3b5a;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .listen-btn:hover { border-color: #00cfff; color: #36dfff; }
+
+    .composer {
+      border-top: 1px solid #1d2b47;
+      padding: 18px 22px 22px;
+    }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 90px;
+      max-height: 200px;
+      background: #080e1a;
+      color: #f4f7ff;
+      border: 1px solid #2b3b5a;
+      border-radius: 12px;
+      padding: 14px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+
+    textarea:focus, select:focus { border-color: #00cfff; }
+
+    .composer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .left-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 9px;
+      padding: 12px 16px;
+      font-size: 13px;
+    }
+
+    .send { color: white; background: linear-gradient(110deg,#00c9ed,#3d5eff); }
+    .tool { color: #c4d4ef; background: #111d32; border: 1px solid #2b3b5a; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .hint { font-size: 11px; color: #8396b6; margin-top: 12px; line-height: 1.6; }
+    .status { font-size: 12px; color: #8fa4c7; margin-top: 10px; min-height: 18px; }
+
+    @media (max-width:700px) {
+      .layout { grid-template-columns: 1fr; margin: 20px auto; }
+      .sidebar { padding: 12px; }
+      .mode-list { display: grid; grid-template-columns: repeat(2,1fr); gap: 4px; }
+      .sidebar .label { margin: 5px 0; }
+      .sidebar p { display: none; }
+      .messages { min-height: 250px; max-height: 50vh; }
+      .chat-head { padding: 17px; }
+      .online { display: none; }
+    }
+  </style>
 </head>
+
 <body>
-<header class="topbar">
-  <a href="index.html" class="brand">भ BhashaMitra AI</a>
-  <a href="index.html" class="back">← Back to Home</a>
-</header>
+  <header class="topbar">
+    <a href="index.html" class="brand">भ BhashaMitra AI</a>
+    <a href="index.html" class="back">← Back to Home</a>
+  </header>
 
-<main class="layout">
-  <aside class="sidebar">
-    <div class="label">ASSISTANT TOOLS</div>
-    <div class="mode-list">
-      <button class="mode active" data-mode="chat">💬 General Chat</button>
-      <button class="mode" data-mode="study">📚 Study Helper</button>
-      <button class="mode" data-mode="summarize">📝 Summarize</button>
-      <button class="mode" data-mode="translate">🌐 Translate</button>
-      <button class="mode" data-mode="improve">✍️ Improve English</button>
-    </div>
-    <div class="label" style="margin-top:24px">ABOUT</div>
-    <p>BhashaMitra AI helps you ask questions, learn concepts and work with text in your preferred language.</p>
-    <button id="clearBtn" class="mode" style="margin-top:12px">＋ New conversation</button>
-  </aside>
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="label">ASSISTANT TOOLS</div>
 
-  <section class="chat-panel">
-    <div class="chat-head">
-      <div class="logo">भ</div>
-      <div><h1>BhashaMitra AI</h1><p>Your language. Your AI companion.</p></div>
-      <span class="online">● Assistant</span>
-    </div>
-
-    <div class="controls">
-      <select id="language" aria-label="Choose response language">
-        <option value="hi-IN">हिन्दी — Hindi</option>
-        <option value="mr-IN">मराठी — Marathi</option>
-        <option value="en-IN">English</option>
-      </select>
-    </div>
-
-    <div class="messages" id="messages" aria-live="polite">
-      <div class="welcome" id="welcome">
-        <div class="welcome-icon">✨</div>
-        <h2>Namaste! Kaise madad karun?</h2>
-        <p>Ask a question in Hindi, Marathi, English or Hinglish.<br>Choose a tool and start your conversation.</p>
+      <div class="mode-list">
+        <button class="mode active" data-mode="chat" type="button">💬 General Chat</button>
+        <button class="mode" data-mode="study" type="button">📚 Study Helper</button>
+        <button class="mode" data-mode="summarize" type="button">📝 Summarize</button>
+        <button class="mode" data-mode="translate" type="button">🌐 Translate</button>
+        <button class="mode" data-mode="improve" type="button">✍️ Improve English</button>
       </div>
-    </div>
 
-    <form class="composer" id="chatForm">
-      <textarea id="question" maxlength="10000" placeholder="Type your question here..." aria-label="Your question" required></textarea>
-      <div class="composer-actions">
-        <div class="left-actions">
-          <button class="tool" type="button" id="voiceBtn">🎙️ Speak</button>
-          <button class="tool" type="button" id="stopBtn">🔇 Stop audio</button>
+      <div class="label" style="margin-top:24px">ABOUT</div>
+      <p>BhashaMitra AI helps you ask questions, learn concepts and work with text in your preferred language.</p>
+      <button id="clearBtn" class="mode" style="margin-top:12px" type="button">＋ New conversation</button>
+    </aside>
+
+    <section class="chat-panel">
+      <div class="chat-head">
+        <div class="logo">भ</div>
+        <div>
+          <h1>BhashaMitra AI</h1>
+          <p>Your language. Your AI companion.</p>
         </div>
-        <button class="send" type="submit" id="sendBtn">Send message →</button>
+        <span class="online">● Assistant</span>
       </div>
-      <div class="status" id="status" role="status"></div>
-      <p class="hint">AI responses can be incorrect. Verify important information. Voice input depends on browser support.</p>
-    </form>
-  </section>
-</main>
 
-<script>
-  // IMPORTANT: Replace this with your deployed FastAPI backend URL.
-  // Example: https://your-backend.onrender.com
-  // Do not put your Sarvam API key in this file.
-  const API_BASE = "https://bhashamitra-ai.onrender.com";
+      <div class="controls">
+        <select id="language" aria-label="Choose response language">
+          <option value="hi-IN">हिन्दी — Hindi</option>
+          <option value="mr-IN">मराठी — Marathi</option>
+          <option value="en-IN">English</option>
+        </select>
+      </div>
 
-  const form = document.getElementById("chatForm");
-  const question = document.getElementById("question");
-  const language = document.getElementById("language");
-  const messagesEl = document.getElementById("messages");
-  const statusEl = document.getElementById("status");
-  const sendBtn = document.getElementById("sendBtn");
-  const voiceBtn = document.getElementById("voiceBtn");
+      <div class="messages" id="messages" aria-live="polite">
+        <div class="welcome" id="welcome">
+          <div class="welcome-icon">✨</div>
+          <h2>Namaste! Kaise madad karun?</h2>
+          <p>Ask a question in Hindi, Marathi, English or Hinglish.<br>Choose a tool and start your conversation.</p>
+        </div>
+      </div>
 
-  let mode = new URLSearchParams(location.search).get("mode") || "chat";
-  const history = [];
-  const validModes = ["chat", "study", "summarize", "translate", "improve"];
-  if (!validModes.includes(mode)) mode = "chat";
+      <form class="composer" id="chatForm">
+        <textarea id="question" maxlength="10000" placeholder="Type your question here..." aria-label="Your question" required></textarea>
 
-  function setMode(nextMode) {
-    mode = nextMode;
-    document.querySelectorAll(".mode[data-mode]").forEach(button => {
-      button.classList.toggle("active", button.dataset.mode === mode);
-    });
-    const placeholders = {
-      chat: "Ask me anything...",
-      study: "Which topic do you want to understand?",
-      summarize: "Paste the text you want to summarize...",
-      translate: "Enter the text you want to translate...",
-      improve: "Enter the English sentence you want to improve..."
-    };
-    question.placeholder = placeholders[mode] || "Type your question...";
-  }
+        <div class="composer-actions">
+          <div class="left-actions">
+            <button class="tool" type="button" id="voiceBtn">🎙️ Speak</button>
+            <button class="tool" type="button" id="stopBtn">🔇 Stop audio</button>
+          </div>
+          <button class="send" type="submit" id="sendBtn">Send message →</button>
+        </div>
 
-  document.querySelectorAll(".mode[data-mode]").forEach(button => {
-    button.addEventListener("click", () => setMode(button.dataset.mode));
-  });
-  setMode(mode);
+        <div class="status" id="status" role="status"></div>
+        <p class="hint">AI responses can be incorrect. Verify important information. Voice input depends on browser support.</p>
+      </form>
+    </section>
+  </main>
 
-  function addBubble(role, content) {
-    const welcome = document.getElementById("welcome");
-    if (welcome) welcome.remove();
+  <script>
+    // Your deployed backend URL. Never put your API key in this file.
+    const API_BASE = "https://bhashamitra-ai.onrender.com";
 
-    const bubble = document.createElement("div");
-    bubble.className = "bubble " + (role === "user" ? "user" : "assistant");
+    const form = document.getElementById("chatForm");
+    const question = document.getElementById("question");
+    const language = document.getElementById("language");
+    const messagesEl = document.getElementById("messages");
+    const statusEl = document.getElementById("status");
+    const sendBtn = document.getElementById("sendBtn");
+    const voiceBtn = document.getElementById("voiceBtn");
 
-    const label = document.createElement("span");
-    label.className = "bubble-label";
-    label.textContent = role === "user" ? "YOU" : "BHASHAMITRA AI";
+    let mode = new URLSearchParams(location.search).get("mode") || "chat";
+    const history = [];
+    const validModes = ["chat", "study", "summarize", "translate", "improve"];
 
-    const text = document.createElement("div");
-    text.textContent = content;
+    if (!validModes.includes(mode)) mode = "chat";
 
-    bubble.append(label, text);
-    messagesEl.appendChild(bubble);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    return bubble;
-  }
+    function setMode(nextMode) {
+      mode = nextMode;
 
-  function friendlyError(error) {
-    if (location.protocol === "file:") {
-      return "Please open this page through your deployed website or a local web server, not directly as a file.";
-    }
-    if (API_BASE.includes("YOUR-BACKEND-URL")) {
-      return "Backend URL is not configured yet. Add your deployed FastAPI URL to API_BASE in app.html.";
-    }
-    return error.message || "Could not get a response. Check your backend URL and try again.";
-  }
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const message = question.value.trim();
-    if (!message) return;
-
-    if (API_BASE.includes("YOUR-BACKEND-URL")) {
-      statusEl.textContent = "Setup required: replace API_BASE with your deployed backend URL.";
-      return;
-    }
-
-    addBubble("user", message);
-    history.push({ role: "user", content: message });
-    question.value = "";
-    sendBtn.disabled = true;
-    statusEl.textContent = "BhashaMitra is thinking...";
-
-    try {
-      const response = await fetch(API_BASE.replace(/\/+$/, "") + "/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message,
-          language: language.value,
-          mode,
-          history: history.slice(-12, -1)
-        })
+      document.querySelectorAll(".mode[data-mode]").forEach(button => {
+        button.classList.toggle("active", button.dataset.mode === mode);
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error("Backend returned an invalid response. Check the backend URL.");
-      }
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Request failed with status " + response.status);
-      }
-      if (!data.reply || typeof data.reply !== "string") {
-        throw new Error("The backend did not return an AI reply.");
-      }
-
-      addBubble("assistant", data.reply);
-      history.push({ role: "assistant", content: data.reply });
-      statusEl.textContent = "Response received.";
-    } catch (error) {
-      statusEl.textContent = friendlyError(error);
-      if (history.length && history[history.length - 1].role === "user") {
-        history.pop();
-      }
-      question.value = message;
-    } finally {
-      sendBtn.disabled = false;
-      question.focus();
-    }
-  });
-
-  document.getElementById("clearBtn").addEventListener("click", () => {
-    history.length = 0;
-    messagesEl.innerHTML = '<div class="welcome" id="welcome"><div class="welcome-icon">✨</div><h2>Namaste! Kaise madad karun?</h2><p>Ask a question in Hindi, Marathi, English or Hinglish.<br>Choose a tool and start your conversation.</p></div>';
-    statusEl.textContent = "New conversation started.";
-    question.value = "";
-  });
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition) {
-    const recognition = new SpeechRecognition();
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    voiceBtn.addEventListener("click", () => {
-      const speechLang = {
-        "hi-IN": "hi-IN",
-        "mr-IN": "mr-IN",
-        "en-IN": "en-IN"
+      const placeholders = {
+        chat: "Ask me anything...",
+        study: "Which topic do you want to understand?",
+        summarize: "Paste the text you want to summarize...",
+        translate: "Enter the text you want to translate...",
+        improve: "Enter the English sentence you want to improve..."
       };
-      recognition.lang = speechLang[language.value] || "hi-IN";
-      statusEl.textContent = "Listening... Please speak now.";
-      try { recognition.start(); }
-      catch { statusEl.textContent = "Voice input is already active. Please wait."; }
+
+      question.placeholder = placeholders[mode] || "Type your question...";
+    }
+
+    document.querySelectorAll(".mode[data-mode]").forEach(button => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
     });
 
-    recognition.onresult = event => {
-      question.value = event.results[0][0].transcript;
-      statusEl.textContent = "Voice captured. Press Send message to submit.";
-      question.focus();
-    };
-    recognition.onerror = event => {
-      statusEl.textContent = "Voice input error: " + event.error + ". You can type instead.";
-    };
-    recognition.onend = () => {
-      if (statusEl.textContent === "Listening... Please speak now.") {
-        statusEl.textContent = "Voice input ended.";
+    setMode(mode);
+
+    // Speak an AI response aloud.
+    function speakText(text) {
+      if (!("speechSynthesis" in window) ||
+          !("SpeechSynthesisUtterance" in window)) {
+        statusEl.textContent = "Voice playback is not supported. Please try Chrome or Edge.";
+        return;
       }
-    };
-  } else {
-    voiceBtn.addEventListener("click", () => {
-      statusEl.textContent = "Voice input is not supported in this browser. Please type your question.";
+
+      const cleanText = String(text || "").trim();
+
+      if (!cleanText) {
+        statusEl.textContent = "There is no text to read aloud.";
+        return;
+      }
+
+      const synth = window.speechSynthesis;
+      synth.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = language.value;
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      utterance.onstart = () => {
+        statusEl.textContent = "🔊 AI is speaking...";
+      };
+
+      utterance.onend = () => {
+        statusEl.textContent = "Audio finished.";
+      };
+
+      utterance.onerror = (event) => {
+        statusEl.textContent =
+          "Voice error: " + event.error +
+          ". Check device volume or try Chrome/Edge.";
+      };
+
+      // Triggered by a real button click, which helps browser autoplay policies.
+      synth.speak(utterance);
+    }
+
+    function addBubble(role, content) {
+      const welcome = document.getElementById("welcome");
+      if (welcome) welcome.remove();
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + (role === "user" ? "user" : "assistant");
+
+      const label = document.createElement("span");
+      label.className = "bubble-label";
+      label.textContent = role === "user" ? "YOU" : "BHASHAMITRA AI";
+
+      const text = document.createElement("div");
+      text.className = "bubble-text";
+      text.textContent = content;
+
+      bubble.append(label, text);
+
+      // Add a separate Listen button below every AI response.
+      if (role === "assistant") {
+        const listenBtn = document.createElement("button");
+        listenBtn.type = "button";
+        listenBtn.className = "listen-btn";
+        listenBtn.textContent = "🔊 Listen";
+
+        listenBtn.addEventListener("click", () => {
+          speakText(content);
+        });
+
+        bubble.appendChild(listenBtn);
+      }
+
+      messagesEl.appendChild(bubble);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return bubble;
+    }
+
+    function friendlyError(error) {
+      return error.message ||
+        "Could not get a response. Check your internet connection and backend.";
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const message = question.value.trim();
+      if (!message) return;
+
+      // Stop any previous speech when sending a new question.
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      addBubble("user", message);
+      history.push({ role: "user", content: message });
+      question.value = "";
+      sendBtn.disabled = true;
+      statusEl.textContent = "BhashaMitra is thinking...";
+
+      try {
+        const response = await fetch(
+          API_BASE.replace(/\/+$/, "") + "/api/chat",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: message,
+              language: language.value,
+              mode: mode,
+              history: history.slice(-12, -1)
+            })
+          }
+        );
+
+        let data;
+
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("Invalid response from backend. Please try again.");
+        }
+
+        if (!response.ok) {
+          throw new Error(data.detail || "Request failed: " + response.status);
+        }
+
+        if (!data.reply || typeof data.reply !== "string") {
+          throw new Error("The backend did not return an AI reply.");
+        }
+
+        addBubble("assistant", data.reply);
+        history.push({ role: "assistant", content: data.reply });
+
+        statusEl.textContent =
+          "Response received. Press 🔊 Listen below the AI reply.";
+      } catch (error) {
+        statusEl.textContent = friendlyError(error);
+
+        if (history.length && history[history.length - 1].role === "user") {
+          history.pop();
+        }
+
+        question.value = message;
+      } finally {
+        sendBtn.disabled = false;
+        question.focus();
+      }
     });
-  }
 
-  document.getElementById("stopBtn").addEventListener("click", () => {
-    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-    statusEl.textContent = "Audio stopped.";
-  });
+    // Start a fresh conversation.
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
 
-  // Speak AI responses aloud when the user clicks a response bubble.
-  messagesEl.addEventListener("click", event => {
-    const bubble = event.target.closest(".assistant");
-    if (!bubble || !("speechSynthesis" in window)) return;
-    const text = bubble.querySelector("div");
-    if (!text) return;
-    const utterance = new SpeechSynthesisUtterance(text.textContent);
-    utterance.lang = language.value;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-    statusEl.textContent = "Speaking response. Click Stop audio to stop.";
-  });
-</script>
+      history.length = 0;
+
+      messagesEl.innerHTML = `
+        <div class="welcome" id="welcome">
+          <div class="welcome-icon">✨</div>
+          <h2>Namaste! Kaise madad karun?</h2>
+          <p>Ask a question in Hindi, Marathi, English or Hinglish.<br>
+          Choose a tool and start your conversation.</p>
+        </div>`;
+
+      statusEl.textContent = "New conversation started.";
+      question.value = "";
+    });
+
+    // Voice input: convert your speech into text.
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      voiceBtn.addEventListener("click", () => {
+        recognition.lang = language.value;
+        statusEl.textContent = "Listening... Please speak now.";
+
+        try {
+          recognition.start();
+        } catch {
+          statusEl.textContent =
+            "Voice input is already active. Please wait and try again.";
+        }
+      });
+
+      recognition.onresult = (event) => {
+        question.value = event.results[0][0].transcript;
+        statusEl.textContent =
+          "Voice captured. Press Send message to submit.";
+        question.focus();
+      };
+
+      recognition.onerror = (event) => {
+        statusEl.textContent =
+          "Voice input error: " + event.error + ". You can type instead.";
+      };
+
+      recognition.onend = () => {
+        if (statusEl.textContent === "Listening... Please speak now.") {
+          statusEl.textContent = "Voice input ended.";
+        }
+      };
+    } else {
+      voiceBtn.addEventListener("click", () => {
+        statusEl.textContent =
+          "Voice input is not supported here. Please try Chrome or Edge.";
+      });
+    }
+
+    // Stop audio immediately.
+    document.getElementById("stopBtn").addEventListener("click", () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      statusEl.textContent = "Audio stopped.";
+    });
+  </script>
 </body>
 </html>

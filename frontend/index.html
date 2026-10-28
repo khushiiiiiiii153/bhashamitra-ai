@@ -1,0 +1,728 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BhashaMitra AI - Voice Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background: #08111f;
+      color: #e8eef8;
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    .panel {
+      background: #111d31;
+      border: 1px solid #293952;
+    }
+
+    .bubble {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    textarea, select {
+      color-scheme: dark;
+    }
+
+    .tool.active {
+      border-color: #22d3ee;
+      background: #083344;
+      color: #a5f3fc;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-2xl bg-cyan-400 text-slate-950 flex items-center justify-center text-2xl font-black">भ</div>
+      <div>
+        <h1 class="text-2xl font-bold">BhashaMitra AI</h1>
+        <p class="text-sm text-slate-400">Your voice. Your language. Your AI friend.</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+      <span id="statusText" class="text-sm text-slate-400">Connecting...</span>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[280px_1fr] gap-5">
+
+  <aside class="panel rounded-2xl p-5 h-fit">
+    <h2 class="font-bold text-lg mb-4">AI Features</h2>
+
+    <label for="language" class="block text-sm text-slate-300 mb-2">
+      Response language
+    </label>
+
+    <select id="language" class="w-full rounded-xl bg-slate-900 border border-slate-700 p-3 mb-5">
+      <option value="hi-IN">Hindi / Hinglish</option>
+      <option value="mr-IN">Marathi</option>
+      <option value="en-IN">English</option>
+    </select>
+
+    <div class="text-sm font-semibold mb-3">Choose a feature</div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-1 gap-2">
+      <button data-mode="chat" class="tool active rounded-xl border border-slate-700 p-3 text-left">
+        💬 General Chat
+      </button>
+
+      <button data-mode="study" class="tool rounded-xl border border-slate-700 p-3 text-left">
+        📚 Study Helper
+      </button>
+
+      <button data-mode="summarize" class="tool rounded-xl border border-slate-700 p-3 text-left">
+        📝 Summarize
+      </button>
+
+      <button data-mode="translate" class="tool rounded-xl border border-slate-700 p-3 text-left">
+        🌐 Translate
+      </button>
+
+      <button data-mode="improve" class="tool rounded-xl border border-slate-700 p-3 text-left">
+        ✍️ Improve English
+      </button>
+    </div>
+
+    <!-- Selected feature's voice controls -->
+    <div id="selectedFeaturePanel" class="mt-5 rounded-xl border border-cyan-800 bg-cyan-950/30 p-4">
+      <h3 id="selectedFeatureTitle" class="font-semibold text-cyan-300">
+        💬 General Chat
+      </h3>
+
+      <p id="selectedFeatureDescription" class="text-xs text-slate-400 mt-2 mb-4">
+        Ask anything by typing or speaking.
+      </p>
+
+      <button id="featureSpeak" class="w-full rounded-xl bg-cyan-400 text-slate-950 font-bold p-3 hover:bg-cyan-300">
+        🎙️ Speak
+      </button>
+
+      <button id="featureListen" class="w-full mt-2 rounded-xl border border-slate-600 p-3 hover:bg-slate-800">
+        🔊 Listen to reply
+      </button>
+
+      <button id="featureStop" class="w-full mt-2 rounded-xl border border-slate-600 p-3 hover:bg-slate-800">
+        ⏹ Stop
+      </button>
+
+      <p id="featureVoiceStatus" class="text-xs text-slate-400 mt-3">
+        Ready
+      </p>
+    </div>
+
+    <button id="clearChat" class="w-full mt-4 rounded-xl border border-slate-700 p-3 hover:bg-slate-800">
+      🗑️ Clear Chat
+    </button>
+  </aside>
+
+  <section class="panel rounded-2xl overflow-hidden flex flex-col min-h-[650px]">
+
+    <div class="px-5 py-4 border-b border-slate-700 flex items-center justify-between gap-3">
+      <div>
+        <h2 class="font-bold">Your Conversation</h2>
+        <p id="modeLabel" class="text-xs text-slate-400 mt-1">Mode: General Chat</p>
+      </div>
+      <span class="text-xs text-cyan-300">AI Assistant</span>
+    </div>
+
+    <div id="messages" class="flex-1 p-4 sm:p-6 space-y-5 overflow-y-auto">
+      <div class="flex gap-3">
+        <div class="w-9 h-9 shrink-0 rounded-xl bg-cyan-400 text-slate-950 flex items-center justify-center font-bold">B</div>
+        <div class="max-w-[90%]">
+          <div class="text-xs text-cyan-300 mb-2">BhashaMitra AI</div>
+          <div class="bubble rounded-2xl rounded-tl-sm bg-slate-800 p-4">
+            Namaste! 🙏 Main BhashaMitra AI hoon. Hindi, Marathi ya English mein sawaal puchho. Koi bhi feature select karke uske niche Speak button use karo.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="errorBox" class="hidden mx-4 mb-3 rounded-xl border border-red-800 bg-red-950/50 p-3 text-sm text-red-200"></div>
+
+    <div class="border-t border-slate-700 p-4">
+      <div class="flex flex-wrap gap-2 mb-3">
+        <button class="suggestion text-xs rounded-full border border-slate-700 px-3 py-2" data-prompt="Explain artificial intelligence in simple words.">
+          Explain AI
+        </button>
+        <button class="suggestion text-xs rounded-full border border-slate-700 px-3 py-2" data-prompt="Give me a 30-minute study plan for today.">
+          Study Plan
+        </button>
+        <button class="suggestion text-xs rounded-full border border-slate-700 px-3 py-2" data-prompt="Teach me five useful English sentences.">
+          Learn English
+        </button>
+      </div>
+
+      <form id="chatForm" class="flex gap-2 items-end">
+        <textarea id="messageInput" rows="2" maxlength="10000"
+          placeholder="Type your message..."
+          class="min-w-0 flex-1 resize-y rounded-xl bg-slate-900 border border-slate-700 p-3 outline-none focus:border-cyan-400"></textarea>
+
+        <button id="sendButton" type="submit"
+          class="rounded-xl bg-cyan-400 text-slate-950 font-bold px-5 py-3">
+          Send
+        </button>
+      </form>
+
+      <div class="flex justify-between gap-3 mt-2 text-xs text-slate-500">
+        <span id="bottomVoiceStatus">Voice mode is off</span>
+        <span>Verify important information.</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="text-center text-xs text-slate-500 px-4 pb-6">
+  BhashaMitra AI · Powered by Sarvam AI
+</footer>
+
+<script>
+  // Local testing URL. For online deployment, replace it with
+  // your actual backend URL, ending in /api/chat.
+  const API_URL = "http://127.0.0.1:8000/api/chat";
+
+  const $ = id => document.getElementById(id);
+
+  let selectedMode = "chat";
+  let history = [];
+  let busy = false;
+  let voiceMode = false;
+  let recognition = null;
+  let recognitionActive = false;
+  let currentUtterance = null;
+  let pendingTranscript = "";
+  let restartTimer = null;
+
+  const modeInfo = {
+    chat: {
+      title: "💬 General Chat",
+      description: "Ask anything by typing or speaking.",
+      placeholder: "Ask me anything..."
+    },
+    study: {
+      title: "📚 Study Helper",
+      description: "Speak a study question and get a simple explanation.",
+      placeholder: "Ask your study question..."
+    },
+    summarize: {
+      title: "📝 Summarize",
+      description: "Speak or type the text you want summarized.",
+      placeholder: "Paste the text to summarize..."
+    },
+    translate: {
+      title: "🌐 Translate",
+      description: "Speak or type text you want translated.",
+      placeholder: "Enter text to translate..."
+    },
+    improve: {
+      title: "✍️ Improve English",
+      description: "Speak an English sentence to improve its grammar.",
+      placeholder: "Enter an English sentence..."
+    }
+  };
+
+  function setStatus(message, connected = true) {
+    $("statusText").textContent = message;
+    $("statusDot").className =
+      "w-2.5 h-2.5 rounded-full " +
+      (connected ? "bg-emerald-400" : "bg-amber-400");
+  }
+
+  function showError(message) {
+    $("errorBox").textContent = message;
+    $("errorBox").classList.remove("hidden");
+  }
+
+  function hideError() {
+    $("errorBox").textContent = "";
+    $("errorBox").classList.add("hidden");
+  }
+
+  function updateFeaturePanel() {
+    const info = modeInfo[selectedMode];
+
+    $("selectedFeatureTitle").textContent = info.title;
+    $("selectedFeatureDescription").textContent = info.description;
+    $("modeLabel").textContent = "Mode: " + info.title;
+    $("messageInput").placeholder = info.placeholder;
+    $("featureVoiceStatus").textContent = "Ready";
+  }
+
+  function cleanTextForSpeech(text) {
+    return String(text)
+      // Omit code blocks when speaking.
+      .replace(/```[\s\S]*?```/g, " Code example omitted. ")
+      .replace(/`([^`]+)`/g, "$1")
+
+      // Markdown bold and italic.
+      .replace(/\*\*(.*?)\*\*/gs, "$1")
+      .replace(/\*(.*?)\*/gs, "$1")
+      .replace(/__(.*?)__/gs, "$1")
+      .replace(/_(.*?)_/gs, "$1")
+
+      // Headings, quotes, lists.
+      .replace(/^\s{0,3}#{1,6}\s*/gm, "")
+      .replace(/^\s*>\s?/gm, "")
+      .replace(/^\s*[-+*•]\s+/gm, "")
+      .replace(/^\s*\d+[.)]\s+/gm, "")
+
+      // Links, HTML, table dividers.
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/^\s*\|?[\s:|-]+\|?\s*$/gm, "")
+      .replace(/<[^>]*>/g, " ")
+
+      // Remove leftover Markdown characters.
+      .replace(/[*_~#|]/g, "")
+
+      // Clean spaces and line breaks.
+      .replace(/[ \t]+/g, " ")
+      .replace(/\n{2,}/g, ". ")
+      .replace(/\n/g, " ")
+      .trim();
+  }
+
+  function scrollToBottom() {
+    const el = $("messages");
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function addMessage(role, text, typing = false) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex gap-3 " +
+      (role === "user" ? "justify-end" : "");
+
+    const avatar = document.createElement("div");
+    avatar.className =
+      "w-9 h-9 shrink-0 rounded-xl flex items-center justify-center font-bold " +
+      (role === "user"
+        ? "bg-violet-400 text-slate-950"
+        : "bg-cyan-400 text-slate-950");
+
+    avatar.textContent = role === "user" ? "Y" : "B";
+
+    const content = document.createElement("div");
+    content.className = "max-w-[90%]";
+
+    const label = document.createElement("div");
+    label.className = "text-xs mb-2 " +
+      (role === "user" ? "text-violet-300" : "text-cyan-300");
+    label.textContent = role === "user" ? "You" : "BhashaMitra AI";
+
+    const bubble = document.createElement("div");
+    bubble.className =
+      "bubble rounded-2xl p-4 " +
+      (role === "user"
+        ? "bg-violet-900/60 rounded-tr-sm"
+        : "bg-slate-800 rounded-tl-sm");
+
+    bubble.textContent = text;
+    content.append(label, bubble);
+
+    if (role === "assistant" && !typing) {
+      const actions = document.createElement("div");
+      actions.className = "flex gap-4 mt-2 text-xs text-slate-400";
+
+      const copyButton = document.createElement("button");
+      copyButton.textContent = "📋 Copy";
+
+      copyButton.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          copyButton.textContent = "Copied!";
+        } catch {
+          showError("Please select and copy the text manually.");
+        }
+      };
+
+      const listenButton = document.createElement("button");
+      listenButton.textContent = "🔊 Listen";
+      listenButton.onclick = () => speak(text, false);
+
+      actions.append(copyButton, listenButton);
+      content.appendChild(actions);
+    }
+
+    if (role === "user") {
+      wrapper.append(content, avatar);
+    } else {
+      wrapper.append(avatar, content);
+    }
+
+    $("messages").appendChild(wrapper);
+    scrollToBottom();
+
+    return wrapper;
+  }
+
+  function stopSpeaking() {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    currentUtterance = null;
+  }
+
+  function speak(text, resumeListening = false) {
+    if (!("speechSynthesis" in window)) {
+      showError("Speech output is not supported by your browser.");
+      return;
+    }
+
+    const cleanText = cleanTextForSpeech(text);
+
+    if (!cleanText) return;
+
+    stopSpeaking();
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = $("language").value;
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+
+    currentUtterance = utterance;
+
+    $("featureVoiceStatus").textContent = "🔊 Speaking...";
+    $("bottomVoiceStatus").textContent = "Speaking AI reply...";
+
+    utterance.onend = () => {
+      if (currentUtterance === utterance) {
+        currentUtterance = null;
+      }
+
+      $("featureVoiceStatus").textContent = "Reply finished";
+      $("bottomVoiceStatus").textContent =
+        voiceMode ? "Voice conversation active" : "Voice mode is off";
+
+      if (resumeListening && voiceMode) {
+        restartListening();
+      }
+    };
+
+    utterance.onerror = () => {
+      if (currentUtterance === utterance) {
+        currentUtterance = null;
+      }
+
+      $("featureVoiceStatus").textContent = "Speech stopped";
+
+      if (resumeListening && voiceMode) {
+        restartListening();
+      }
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  async function sendMessage(text, fromVoice = false) {
+    text = text.trim();
+
+    if (!text || busy) return;
+
+    hideError();
+    busy = true;
+    $("sendButton").disabled = true;
+    $("messageInput").disabled = true;
+
+    addMessage("user", text);
+    history.push({ role: "user", content: text });
+    $("messageInput").value = "";
+
+    setStatus("Thinking...");
+
+    const typing = addMessage("assistant", "Thinking...", true);
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          language: $("language").value,
+          mode: selectedMode,
+          history: history.slice(0, -1).slice(-12)
+        })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Check your backend URL and API key.");
+      }
+
+      if (!data.reply) {
+        throw new Error("AI returned an empty response.");
+      }
+
+      typing.remove();
+      addMessage("assistant", data.reply);
+
+      history.push({ role: "assistant", content: data.reply });
+      history = history.slice(-24);
+
+      setStatus("Connected");
+
+      if (fromVoice && voiceMode) {
+        speak(data.reply, true);
+      } else {
+        $("featureVoiceStatus").textContent = "AI reply ready";
+      }
+
+    } catch (error) {
+      typing.remove();
+      showError("Could not get an AI reply: " + error.message);
+      setStatus("Connection issue", false);
+      $("featureVoiceStatus").textContent = "Please try again";
+
+      if (fromVoice && voiceMode) {
+        restartListening();
+      }
+    } finally {
+      busy = false;
+      $("sendButton").disabled = false;
+      $("messageInput").disabled = false;
+      $("messageInput").focus();
+    }
+  }
+
+  function getRecognition() {
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      showError("Voice input is unsupported. Try Chrome or Edge.");
+      return null;
+    }
+
+    const instance = new SpeechRecognition();
+    instance.continuous = false;
+    instance.interimResults = true;
+    instance.maxAlternatives = 1;
+
+    instance.onstart = () => {
+      recognitionActive = true;
+      $("featureVoiceStatus").textContent = "🎙️ Listening...";
+      $("bottomVoiceStatus").textContent = "Listening...";
+      setStatus("Listening...");
+    };
+
+    instance.onresult = (event) => {
+      let interim = "";
+      let finalText = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const phrase = event.results[i][0].transcript;
+
+        if (event.results[i].isFinal) {
+          finalText += phrase;
+        } else {
+          interim += phrase;
+        }
+      }
+
+      if (finalText.trim()) {
+        pendingTranscript += " " + finalText.trim();
+      }
+
+      $("messageInput").value =
+        (pendingTranscript + " " + interim).trim();
+    };
+
+    instance.onerror = (event) => {
+      if (event.error !== "no-speech" && event.error !== "aborted") {
+        showError("Microphone error: " + event.error +
+          ". Check microphone permissions.");
+      }
+    };
+
+    instance.onend = () => {
+      recognitionActive = false;
+
+      const spoken = pendingTranscript.trim();
+      pendingTranscript = "";
+
+      if (!voiceMode) return;
+
+      if (spoken) {
+        $("messageInput").value = "";
+        sendMessage(spoken, true);
+      } else if (!busy) {
+        restartListening();
+      }
+    };
+
+    return instance;
+  }
+
+  function startRecognition() {
+    if (!voiceMode || busy || recognitionActive) return;
+
+    if (!recognition) {
+      recognition = getRecognition();
+    }
+
+    if (!recognition) return;
+
+    recognition.lang = $("language").value;
+    pendingTranscript = "";
+
+    try {
+      recognition.start();
+    } catch (error) {
+      console.warn("Could not start recognition:", error.message);
+    }
+  }
+
+  function restartListening() {
+    if (!voiceMode || busy) return;
+
+    clearTimeout(restartTimer);
+
+    restartTimer = setTimeout(() => {
+      if (voiceMode && !busy && !recognitionActive) {
+        startRecognition();
+      }
+    }, 700);
+  }
+
+  function startVoiceMode() {
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      showError("Use the latest Chrome or Edge for voice input.");
+      return;
+    }
+
+    hideError();
+    voiceMode = true;
+
+    $("featureSpeak").textContent = "⏹ Stop conversation";
+    $("featureVoiceStatus").textContent = "Starting microphone...";
+    $("bottomVoiceStatus").textContent = "Voice conversation active";
+
+    startRecognition();
+  }
+
+  function stopVoiceMode() {
+    voiceMode = false;
+    pendingTranscript = "";
+
+    clearTimeout(restartTimer);
+    stopSpeaking();
+
+    $("featureSpeak").textContent = "🎙️ Speak";
+    $("featureVoiceStatus").textContent = "Voice stopped";
+    $("bottomVoiceStatus").textContent = "Voice mode is off";
+
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch (error) {
+        console.warn(error);
+      }
+    }
+
+    setStatus("Ready");
+  }
+
+  // Feature selection updates the panel below the selected feature.
+  document.querySelectorAll(".tool").forEach(button => {
+    button.addEventListener("click", () => {
+      selectedMode = button.dataset.mode;
+
+      document.querySelectorAll(".tool").forEach(item => {
+        item.classList.remove("active");
+      });
+
+      button.classList.add("active");
+      updateFeaturePanel();
+    });
+  });
+
+  // Speak button under the selected feature.
+  $("featureSpeak").addEventListener("click", () => {
+    if (voiceMode) {
+      stopVoiceMode();
+    } else {
+      startVoiceMode();
+    }
+  });
+
+  // Read the latest AI reply aloud.
+  $("featureListen").addEventListener("click", () => {
+    const lastReply = [...history]
+      .reverse()
+      .find(item => item.role === "assistant");
+
+    if (lastReply) {
+      speak(lastReply.content, false);
+    } else {
+      $("featureVoiceStatus").textContent = "Ask a question first";
+    }
+  });
+
+  $("featureStop").addEventListener("click", () => {
+    stopVoiceMode();
+    $("featureVoiceStatus").textContent = "Voice stopped";
+  });
+
+  $("chatForm").addEventListener("submit", event => {
+    event.preventDefault();
+    sendMessage($("messageInput").value, false);
+  });
+
+  document.querySelectorAll(".suggestion").forEach(button => {
+    button.addEventListener("click", () => {
+      $("messageInput").value = button.dataset.prompt;
+      $("messageInput").focus();
+    });
+  });
+
+  $("clearChat").addEventListener("click", () => {
+    stopVoiceMode();
+    history = [];
+    $("messages").replaceChildren();
+    hideError();
+
+    addMessage(
+      "assistant",
+      "Chat cleared! Select any feature and start a new conversation."
+    );
+  });
+
+  $("language").addEventListener("change", () => {
+    if (voiceMode) {
+      stopVoiceMode();
+      startVoiceMode();
+    }
+  });
+
+  updateFeaturePanel();
+
+  fetch(API_URL.replace(/\/api\/chat\/?$/, "/health"))
+    .then(response => {
+      if (!response.ok) throw new Error("Backend unavailable");
+      return response.json();
+    })
+    .then(() => setStatus("Backend connected"))
+    .catch(() => setStatus("Check backend URL", false));
+</script>
+
+</body>
+</html>
